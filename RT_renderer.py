@@ -12,6 +12,7 @@ class Renderer():
         self.camera = cCamera
         self.integrator = iIntegrator
         self.scene = sScene
+        self.num_cores = multiprocessing.cpu_count()
 
     def _render_row(self, j):
         row_data = []
@@ -64,7 +65,7 @@ class Renderer():
             self.camera.img_height * self.camera.img_width
         )
 
-        with multiprocessing.Pool() as pool:
+        with multiprocessing.Pool(processes=self.num_cores//2) as pool:
 
             results = pool.imap_unordered(
                 self._render_row,
@@ -84,7 +85,7 @@ class Renderer():
             self.camera.img_height * self.camera.img_width
         )
 
-        with multiprocessing.Pool() as pool:
+        with multiprocessing.Pool(processes=self.num_cores//2) as pool:
 
             results = pool.imap_unordered(
                 self._render_row_jittered,

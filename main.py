@@ -104,7 +104,7 @@ def renderScene():
     main_camera.vec_up = rtu.Vec3(0, 1, 0)
 
     defocus_angle = 0.0
-    focus_distance = 8.0
+    focus_distance = 1.0
     main_camera.init_camera(defocus_angle, focus_distance)
     # add objects to the scene
 
