@@ -58,9 +58,9 @@ class Camera:
         self.film = np.zeros((self.img_height, self.img_width, self.img_spectrum))
 
         # compute defocus parameters.
-        defocus_radius = defocus_radius = self.Lens.get_aperture() * 0.5
-        self.defocus_disk_u = self.camera_frame_u * defocus_radius
-        self.defocus_disk_v = self.camera_frame_v * defocus_radius
+        self.Lens.compute_defocus_disk(self.camera_frame_u, self.camera_frame_v)
+        self.defocus_disk_u = self.Lens.get_defocus_disk_u()
+        self.defocus_disk_v = self.Lens.get_defocus_disk_v()
 
     # call right before init_camera()
     def set_Lens(self, fDefocusAngle, fFocusDist):
@@ -144,18 +144,34 @@ class Thinlens(Lens):
     def __init__(self, fDefocusAngle=0.0, fFocusDist=10.0, fAperture=1.0) -> None:
         super().__init__()
 
-
         self.defocus_angle = fDefocusAngle
         self.focus_distance = fFocusDist
-        self.aperture= fAperture
+        self.aperture = fAperture
+        self.set_defocus_radius()
+        pass
 
+    def set_defocus_radius(self):
+        angle_radius = self.focus_distance * math.tan(math.radians(self.defocus_angle / 2.0))
+        self.defocus_radius = angle_radius * (self.aperture / 2.0)
+
+    def compute_defocus_disk(self, vU, vV):
+        self.defocus_disk_u = vU*self.defocus_radius
+        self.defocus_disk_v = vV*self.defocus_radius
+
+    def random_in_lens(self, cameraCenter):
+        p = rtu.Vec3.random_vec3_in_unit_disk()
+        return cameraCenter + (self.defocus_disk_u*p.x()) + (self.defocus_disk_v*p.y())
 
     def get_focus_dist(self):
         return self.focus_distance
     def get_defocus_angle(self):
         return self.defocus_angle
+    def get_defocus_disk_u(self):
+        return self.defocus_disk_u
+    def get_defocus_disk_v(self):
+        return self.defocus_disk_v
+    
     def get_aperture(self):
         return self.aperture
-
 
     

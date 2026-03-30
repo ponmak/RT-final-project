@@ -7,129 +7,67 @@ import RT_object as rto
 import RT_integrator as rti
 import RT_light as rtl
 import RT_texture as rtt
+import random
 
-def renderDoF():
+def render_dream_scene():
     main_camera = rtc.Camera()
-    main_camera.aspect_ratio = 16.0/9.0
-    main_camera.img_width = 480
-    main_camera.center = rtu.Vec3(0,0,0)
-    main_camera.samples_per_pixel = 100
+    main_camera.aspect_ratio = 16.0 / 9.0
+    main_camera.img_width = 1920
+    main_camera.samples_per_pixel = 10
     main_camera.max_depth = 5
-    main_camera.vertical_fov = 60
-    main_camera.look_from = rtu.Vec3(-2, 2, 1)
-    main_camera.look_at = rtu.Vec3(0, 0, -1)
+    main_camera.vertical_fov = 45
+    
+    
+    main_camera.look_from = rtu.Vec3(0, 0, 20)
+    main_camera.look_at = rtu.Vec3(0, 0, 0)
     main_camera.vec_up = rtu.Vec3(0, 1, 0)
 
-    defocus_angle = 2.0
-    focus_distance = 5.0
+    
+    defocus_angle = 3.0
+    focus_distance = 15.0
     main_camera.init_camera(defocus_angle, focus_distance)
-    # add objects to the scene
 
-    tex_checker_bw = rtt.CheckerTexture(0.32, rtu.Color(.2, .2, .2), rtu.Color(.9, .9, .9))
+    world = rts.Scene(cBgcolor=rtu.Color(1.0, 1.0, 1.0))
 
-    mat_tex_checker_bw = rtm.TextureColor(tex_checker_bw)
+    color_palette = [
+        rtu.Color(1.0, 0.6, 0.8), # ชมพู Pastel สว่าง
+        rtu.Color(0.6, 0.8, 1.0), # ฟ้า Pastel สว่าง
+        rtu.Color(1.0, 0.95, 0.6),# เหลือง Pastel สว่าง
+        rtu.Color(0.7, 1.0, 0.6), # เขียว Pastel สว่าง
+        rtu.Color(0.8, 0.6, 1.0), # ม่วง Pastel สว่าง
+        rtu.Color(0.5, 0.8, 1.0), # น้ำเงินอ่อนสดใส
+        rtu.Color(1.0, 0.8, 0.6), # ส้มอ่อนสว่าง
+    ]
 
-    mat_blinn1 = rtm.Blinn(rtu.Color(0.8, 0.5, 0.8), 0.5, 0.2, 8)
-    mat_blinn2 = rtm.Blinn(rtu.Color(0.4, 0.5, 0.4), 0.5, 0.6, 8)
-    mat_blinn3 = rtm.Blinn(rtu.Color(0.8, 0.5, 0.4), 0.5, 0.2, 8)
+    num_spheres = 100
+    for _ in range(num_spheres):
+        x = random.uniform(-9, 9)
+        y = random.uniform(-5, 5)
+        z = random.uniform(-4, 4)
+        center = rtu.Vec3(x, y, z)
+        
+        radius = random.uniform(0.4, 1.3)
+        color = random.choice(color_palette)
+        
+        mat = rtm.Blinn(color, 1.0, 0.1, 5) 
+        world.add_object(rto.Sphere(center, radius, mat))
 
+    red_mat = rtm.Lambertian(rtu.Color(1.0, 0.2, 0.2)) 
+    world.add_object(rto.Sphere(rtu.Vec3(1.5, 0.8, 2.0), 0.25, red_mat))
 
-    world = rts.Scene()
-    world.add_object(rto.Sphere(rtu.Vec3(   0,-100.5,-1),  100, mat_tex_checker_bw))
-    world.add_object(rto.Sphere(rtu.Vec3(-1.0,   0.0,-1),  0.5, mat_blinn1))    # left
-    world.add_object(rto.Sphere(rtu.Vec3(   0,   0.0,-1),  0.5, mat_blinn2))    # center
-    world.add_object(rto.Sphere(rtu.Vec3( 1.0,   0.0,-1),  0.5, mat_blinn3))    # right
+    additional_light = rtl.Diffuse_light(rtu.Color(1.0, 0.8, 0.6))
+    world.add_object(rto.Sphere(rtu.Vec3(-2.0, 3.0, 6.0), 0.5, additional_light))
 
-    intg = rti.Integrator(bSkyBG=True)
-
+    intg = rti.Integrator(bSkyBG=True) 
+    
     renderer = rtren.Renderer(main_camera, intg, world)
+    
     renderer.render_jittered()
-    renderer.write_img2png('week10_jitter_DoF.png')    
-
-    renderer = rtren.Renderer(main_camera, intg, world)
-    renderer.render_jittered()
-    renderer.write_img2png('week10_DoF.png')  
-
-def renderMoving():
-    main_camera = rtc.Camera()
-    main_camera.aspect_ratio = 16.0/9.0
-    main_camera.img_width = 480
-    main_camera.center = rtu.Vec3(0,0,0)
-    main_camera.samples_per_pixel = 200
-    main_camera.max_depth = 5
-    main_camera.vertical_fov = 60
-    main_camera.look_from = rtu.Vec3(-2, 2, 1)
-    main_camera.look_at = rtu.Vec3(0, 0, -1)
-    main_camera.vec_up = rtu.Vec3(0, 1, 0)
-
-    defocus_angle = 0.0
-    focus_distance = 5.0
-    main_camera.init_camera(defocus_angle, focus_distance)
-    # add objects to the scene
-
-    tex_checker_bw = rtt.CheckerTexture(0.32, rtu.Color(.2, .2, .2), rtu.Color(.9, .9, .9))
-
-    mat_tex_checker_bw = rtm.TextureColor(tex_checker_bw)
-
-    mat_blinn1 = rtm.Blinn(rtu.Color(0.8, 0.5, 0.8), 0.5, 0.2, 8)
-    mat_blinn2 = rtm.Blinn(rtu.Color(0.4, 0.5, 0.4), 0.5, 0.6, 8)
-    mat_blinn3 = rtm.Blinn(rtu.Color(0.8, 0.5, 0.4), 0.5, 0.2, 8)
-
-
-    sph_left = rto.Sphere(rtu.Vec3(-1.0,   0.0,-1),  0.5, mat_blinn1)
-    sph_left.add_moving(rtu.Vec3(-1.0,   0.0,-1) + rtu.Vec3(0.0, 0.5,0.0))
-
-    world = rts.Scene()
-    world.add_object(rto.Sphere(rtu.Vec3(   0,-100.5,-1),  100, mat_tex_checker_bw))
-    world.add_object(sph_left)    # left
-    world.add_object(rto.Sphere(rtu.Vec3(   0,   0.0,-1),  0.5, mat_blinn2))    # center
-    world.add_object(rto.Sphere(rtu.Vec3( 1.0,   0.0,-1),  0.5, mat_blinn3))    # right
-
-    intg = rti.Integrator(bSkyBG=True)
-
-    renderer = rtren.Renderer(main_camera, intg, world)
-    renderer.render_jittered()
-    renderer.write_img2png('week10_moving_nojitter.png') 
-
-def renderScene():
-    main_camera = rtc.Camera()
-    main_camera.aspect_ratio = 16.0/9.0
-    main_camera.img_width = 3840
-    main_camera.center = rtu.Vec3(0,0,0)
-    main_camera.samples_per_pixel = 100
-    main_camera.max_depth = 7
-    main_camera.vertical_fov = 60
-    main_camera.look_from = rtu.Vec3(-2, 2, 1)
-    main_camera.look_at = rtu.Vec3(0, 0, -1)
-    main_camera.vec_up = rtu.Vec3(0, 1, 0)
-
-    defocus_angle = 0.0
-    focus_distance = 1.0
-    main_camera.init_camera(defocus_angle, focus_distance)
-    # add objects to the scene
-
-    tex_checker_bw = rtt.CheckerTexture(0.32, rtu.Color(.2, .2, .2), rtu.Color(.9, .9, .9))
-
-    mat_tex_checker_bw = rtm.TextureColor(tex_checker_bw)
-
-    mat_blinn1 = rtm.Blinn(rtu.Color(0.8, 0.5, 0.8), 0.5, 0.2, 8)
-    mat_blinn2 = rtm.Blinn(rtu.Color(0.4, 0.5, 0.4), 0.5, 0.6, 8)
-    mat_blinn3 = rtm.Blinn(rtu.Color(0.8, 0.5, 0.4), 0.5, 0.2, 8)
-
-
-    world = rts.Scene()
-    world.add_object(rto.Sphere(rtu.Vec3(   0,-100.5,-1),  100, mat_tex_checker_bw))
-    world.add_object(rto.Sphere(rtu.Vec3(-1.0,   0.0,-1),  0.5, mat_blinn1))    # left
-    world.add_object(rto.Sphere(rtu.Vec3(   0,   0.0,-1),  0.5, mat_blinn2))    # center
-    world.add_object(rto.Sphere(rtu.Vec3( 1.0,   0.0,-1),  0.5, mat_blinn3))    # right
-
-    intg = rti.Integrator(bSkyBG=True)
-
-    renderer = rtren.Renderer(main_camera, intg, world)
-    renderer.render_jittered()
-    renderer.write_img2png('week10_testing_4K.png')    
-
+    
+    output_filename = 'bright_dream_recreation_3.png'
+    renderer.write_img2png(output_filename) 
+    print(f"เรนเดอร์เสร็จสิ้น! บันทึกไฟล์เป็น: {output_filename}")
 
 if __name__ == "__main__":
-    renderScene()
+    render_dream_scene()
 
