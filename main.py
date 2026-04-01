@@ -13,7 +13,7 @@ def render_dream_scene():
     main_camera = rtc.Camera()
     main_camera.aspect_ratio = 16.0 / 9.0
     main_camera.img_width = 1920
-    main_camera.samples_per_pixel = 10
+    main_camera.samples_per_pixel = 1024
     main_camera.max_depth = 5
     main_camera.vertical_fov = 45
     
