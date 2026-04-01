@@ -15,13 +15,15 @@ def render_dream_scene():
     main_camera.img_width = 1920
     main_camera.samples_per_pixel = 1024
     main_camera.max_depth = 5
-    main_camera.vertical_fov = 45
     
     
     main_camera.look_from = rtu.Vec3(0, 0, 20)
     main_camera.look_at = rtu.Vec3(0, 0, 0)
     main_camera.vec_up = rtu.Vec3(0, 1, 0)
 
+    
+    main_camera.vertical_fov = 90
+    num_spheres = 50
     
     defocus_angle = 3.0
     focus_distance = 15.0
@@ -39,7 +41,6 @@ def render_dream_scene():
         rtu.Color(1.0, 0.8, 0.6), # ส้มอ่อนสว่าง
     ]
 
-    num_spheres = 100
     for _ in range(num_spheres):
         x = random.uniform(-9, 9)
         y = random.uniform(-5, 5)
